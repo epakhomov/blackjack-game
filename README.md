@@ -1,4 +1,4 @@
-# 🎰 Blackjack Game
+# 🎰 Blackjack Game SKO
 
 A fully-featured, web-based Blackjack card game with casino-style aesthetics. Built with React, TypeScript, and Node.js.
 
