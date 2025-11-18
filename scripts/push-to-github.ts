@@ -2,40 +2,12 @@ import { Octokit } from '@octokit/rest';
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
-let connectionSettings: any;
-
 async function getAccessToken() {
-  if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
-    return connectionSettings.settings.access_token;
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  if (!token) {
+    throw new Error('GITHUB_TOKEN or GH_TOKEN environment variable is required to authenticate to GitHub');
   }
-  
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME
-  const xReplitToken = process.env.REPL_IDENTITY 
-    ? 'repl ' + process.env.REPL_IDENTITY 
-    : process.env.WEB_REPL_RENEWAL 
-    ? 'depl ' + process.env.WEB_REPL_RENEWAL 
-    : null;
-
-  if (!xReplitToken) {
-    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
-  }
-
-  connectionSettings = await fetch(
-    'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=github',
-    {
-      headers: {
-        'Accept': 'application/json',
-        'X_REPLIT_TOKEN': xReplitToken
-      }
-    }
-  ).then(res => res.json()).then(data => data.items?.[0]);
-
-  const accessToken = connectionSettings?.settings?.access_token || connectionSettings.settings?.oauth?.credentials?.access_token;
-
-  if (!connectionSettings || !accessToken) {
-    throw new Error('GitHub not connected');
-  }
-  return accessToken;
+  return token;
 }
 
 async function getUncachableGitHubClient() {
@@ -134,7 +106,7 @@ async function main() {
   }
   
   console.log('Collecting project files...');
-  const files = getAllFiles('/home/runner/workspace');
+  const files = getAllFiles(process.cwd());
   console.log(`Found ${files.length} files to upload`);
   
   console.log('Creating tree...');
