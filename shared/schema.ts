@@ -29,3 +29,12 @@ export type GameState = z.infer<typeof gameStateSchema>;
 export type GameAction = z.infer<typeof gameActionSchema>;
 export type Suit = typeof suits[number];
 export type Rank = typeof ranks[number];
+
+// User schema for authentication
+export const userSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  password: z.string(), // hashed password
+});
+
+export type User = z.infer<typeof userSchema>;
